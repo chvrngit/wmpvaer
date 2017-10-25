@@ -10,7 +10,7 @@ To tell you the truth just downloading the tar.gz file is alot faster than using
 
 
 JUST WANT THE VIGNETTE? YOU ARE IN LUCK- YOU DON'T HAVE TO CREATE A COPY OF IT YOURSELF.
-I have also included a file called "wmpvaerVpdf.pdf"  in the github repository that has THE created vignette in PDF form. 
+I have also included a file called "wmpvaerVpdf.pdf"  in the github repository that has the created vignette in PDF form. 
 
 
 
