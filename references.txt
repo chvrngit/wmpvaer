@@ -1,0 +1,7 @@
+Butler, R.W. and Wood, A.T.A.,2005,"Approximation of Power in Multivariate Analysis" in Statistics and Computing Vol. 15,
+                                    pp. 281-287,Springer-Verlang
+Daniels,H., 1954 "Saddlepoint approximations in statistics." Annals of Mathematical Statistics, v. 25 ,pp. 631-650, 
+Lugannani, R.; Rice, S. (1980), "Saddlepoint Approximation for the Distribution of the Sum of Independent Random Variables" in Advances  
+                                 in Probability, Vol. 12, pp. 475-490 
+Muirhead,R.J,1982 Aspects of Multivariate Statistical Theory, John Wiley,New York
+
