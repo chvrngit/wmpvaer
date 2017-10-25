@@ -6,11 +6,11 @@ likelihood ratio statistic for block independence and equivalence of covariance 
 
 This github repository also contains a PDF of Butler/Wood 2005. In addition a tar.gz which can be downloaded to separately install the R package from a local file without using the devtools program with the R GUI (that is, >devtools::install_github("chvrngit/wmpvaer)).
 
-To tell you the truth just downloading the tar.gz file is alot faster than using devtools and install_github. But remember if you go the devtools and github route ,and want the vignette, you have to use  >devtools::install_github("chvrngit/wmpvaer",build_vignettes=TRUE) instead and use >vignette("wmpvaerV", "wmpvaer") to view the vignette created.
+To tell you the truth just downloading the tar.gz file is alot faster than using devtools and install_github. But remember if you go the devtools and install_github route ,and want the vignette, you have to use >devtools::install_github("chvrngit/wmpvaer",build_vignettes=TRUE) instead and use >vignette("wmpvaerV", "wmpvaer") to view the vignette created.
 
 
 JUST WANT THE VIGNETTE? YOU ARE IN LUCK- YOU DON'T HAVE TO CREATE A COPY OF IT YOURSELF.
-I have also included a file called "wmpvaerVpdf.pdf"  in the github repository that has the created vignette in PDF form. 
+I have also included a repsoitory file called "wmpvaerVpdf.pdf"  in the github repository that has the created vignette in PDF form. 
 
 
 
