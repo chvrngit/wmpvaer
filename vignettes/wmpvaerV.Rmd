@@ -208,7 +208,8 @@ Use lm( ) function, create MANOVA w "plastic" dataset & derive eigenvalues from 
      mstats<-summary(manova(fit), test="Wilks")$stats;
      fm<-as.matrix(mstats[,1]);
      nrms<-nrow(fm);
-     m_df<-as.matrix(fm[1:(nrms-1),]);
+	 m_df<-fm[1:(nrms-1),];
+     m_dfm<-as.matrix(fm[1:(nrms-1),]);
      e_df<-fm[nrms,];
 
      # get list of Sum of Squares matricies
@@ -226,10 +227,10 @@ Use lm( ) function, create MANOVA w "plastic" dataset & derive eigenvalues from 
      eigsm<-rbind(eigsm,eigenvs);
      }
      colnames(eigsm)<-c(" "," "," ");
-     rownames(eigsm)<-rownames(m_df);
+     rownames(eigsm)<-rownames(m_dfm);
 
    	 # run S4 object "mlandr" wrapper function
-	 mlandrf(e_dfm,m_dfm,eigsm);
+	 mlandrf(e_df,m_df,eigsm);
 ```
 The computed Wilks statistics are slightly different from the values produced by R MANOVA. They are computed with 120 bit
 precision from the derived eigenvalues.
