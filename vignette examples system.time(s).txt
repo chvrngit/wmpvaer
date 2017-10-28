@@ -89,7 +89,7 @@ Example 1, part 1 mlandrf section
    0.21    0.00   12.14 
 
 
-Example 2, part 1 malndrf section 
+Example 2, part 1 mlandrf section 
 
      suppressPackageStartupMessages(library(Rmpfr)); 
  	 suppressPackageStartupMessages(library(doParallel));
