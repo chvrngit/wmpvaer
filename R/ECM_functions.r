@@ -465,7 +465,7 @@ second_der<-  diffr/(2*parma);
 return(second_der);
 }
 }
-#' p_l_and_rECM computes the Lugananni and Rice approx. of power 
+#' p_l_and_rECM computes the Lugannani and Rice approx. of power 
 #' @param lambdaECM The value of a equality of covariance likelihood ratio statistic 
 #' @param N1 Number of rows in matrix 1  
 #' @param N2 Number of rows in matrix 2  
