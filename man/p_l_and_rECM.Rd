@@ -2,7 +2,7 @@
 % Please edit documentation in R/ECM_functions.r
 \name{p_l_and_rECM}
 \alias{p_l_and_rECM}
-\title{p_l_and_rECM computes the Lugananni and Rice approx. of power}
+\title{p_l_and_rECM computes the Lugannani and Rice approx. of power}
 \usage{
 p_l_and_rECM(lambdaECM, N1, N2, sigma_eigv)
 }
