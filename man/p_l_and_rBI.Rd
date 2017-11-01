@@ -2,7 +2,7 @@
 % Please edit documentation in R/BI_functions.r
 \name{p_l_and_rBI}
 \alias{p_l_and_rBI}
-\title{p_l_and_rBI computes the Lugananni and Rice approx. of power}
+\title{p_l_and_rBI computes the Lugannani and Rice approx. of power}
 \usage{
 p_l_and_rBI(lambdaBI, N, psqrd)
 }
@@ -14,5 +14,5 @@ p_l_and_rBI(lambdaBI, N, psqrd)
 \item{psqrd}{The a vector of squared eigenvalues}
 }
 \description{
-p_l_and_rBI computes the Lugananni and Rice approx. of power
+p_l_and_rBI computes the Lugannani and Rice approx. of power
 }

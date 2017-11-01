@@ -2,7 +2,7 @@
 % Please edit documentation in R/objects_and_functions.r
 \name{p_l_and_r}
 \alias{p_l_and_r}
-\title{p_l_and_r computes the Lugananni and Rice approx. of power}
+\title{p_l_and_r computes the Lugannani and Rice approx. of power}
 \usage{
 p_l_and_r(wilks, n, m, omega)
 }
@@ -17,5 +17,5 @@ p_l_and_r(wilks, n, m, omega)
 corresponding to one independent variable.}
 }
 \description{
-p_l_and_r computes the Lugananni and Rice approx. of power
+p_l_and_r computes the Lugannani and Rice approx. of power
 }
