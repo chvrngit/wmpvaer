@@ -511,7 +511,7 @@ return(second_der);
 
 }
 
-#' p_l_and_r computes the Lugananni and Rice approx. of power 
+#' p_l_and_r computes the Lugannani and Rice approx. of power 
 #'
 #' @param wilks The value of the Wilks statistic for one independent variable
 #' @param n The error Df of the one-way MANOVA analysis considered

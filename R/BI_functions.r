@@ -397,7 +397,7 @@ return(second_der);
 }
 }
 
-#' p_l_and_rBI computes the Lugananni and Rice approx. of power 
+#' p_l_and_rBI computes the Lugannani and Rice approx. of power 
 #'
 #' @param lambdaBI The value of a block independence likelihood ratio statistic 
 #' @param N the number of columns in the data matrix
