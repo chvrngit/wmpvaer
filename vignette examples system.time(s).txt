@@ -191,7 +191,7 @@ Example 4: part 2
     wolf$location<-NULL;
     wolfm1<-as.matrix(wolf[,1:9]);
     nc_at_time<-1;
-    system.time(statsBIncatf(wolfm1,nc_at_time);
+    system.time(statsBIncatf(wolfm1,nc_at_time));
 	
     user  system elapsed 
     0.11    0.03   59.73 
