@@ -863,3 +863,77 @@ answer<-compute.pwilks(new("mlandr",e_df=e_dfm,m_df=m_dfm,eigs=eigsm));
 return(answer);
 }
 
+#' oneway_mss   Computes est (based on the Wilks statistic) of # repetitions and sample 
+#'               estimates for 1-way MANOVA w. 2 to 7 dependent vars and from 2 to 12 
+#'               levels of an independent var.
+#' \code{oneway_mss} takes two parameters: a scalar indicating number of levels and 
+#'                 a vector of the eigenvalues of a 1-way MANOVA (E-Inv)*H matrix. 
+#' @param n_level Is a numeric scalar, =>2 & =<12 
+#' @param omega Is numeric vector,eigenvalues of a 1-way MANOVA (E-Inv)*H matrix, length=>2 & =<7 
+#' @examples
+#'     suppressPackageStartupMessages(library(Rmpfr)); 
+#'     library(wmpvaer);
+#'     rate_eigs<-c(1.6187719, -9.273797e-17,  3.365044e-18);
+#'     rate_n_level<-2;  
+#'     oneway_mss(rate_n_level,rate_eigs);
+#' @keywords multivariate    &   Multivariate Techniques
+#' @return (if repetitions<=20) printed results. 
+#' @export
+oneway_mss<- function(n_level,omega) {
+
+if((is.atomic(n_level) && (length(n_level) == 1L))==FALSE){stop("n_level must be a scalar")};
+
+if( (is.numeric(n_level))==FALSE){stop("n_level must be numeric") };
+
+omega<-as.numeric(omega);
+if( (is.vector(omega))==FALSE ){stop("omega must be a vector")};
+if( (any(is.na(omega)))==TRUE ){stop("omega must be a numeric")};
+
+
+if( (n_level<2)==TRUE ){stop("1-way levels must >=2") };
+if( (n_level>12)==TRUE ){stop("program limited to levels <=12") };
+
+l_omega<-length(omega);
+
+if( (l_omega<2)==TRUE ){stop("model must have 2 or more dependent vars") };
+if( (l_omega>7)==TRUE ){stop("program restricted to models between 2 and 7 dependent vars") };
+
+m<-(n_level-1);
+
+w_mid<-wmpvaer::alpham[m,(l_omega+2)]
+
+J<-1;
+repeat{
+J<-J+1;
+if((J>20)==TRUE){
+cat("\n")
+cat("1-Way MANOVA Balanced A-priori Study Design","\n")
+cat("----------------------------","\n")
+cat("eigs(E-inv*H)=",omega,"\n")
+cat("levels=",n_level,",dependent vars=",l_omega,"\n")
+cat("alpha approx.=.05",",power>=.9","\n")
+cat("repetitions needed=NO ANSWER","\n")
+cat("Program Stopped, est. reps>20")
+break}
+
+ndf<-(n_level*J)
+
+difans2<-p_l_and_r(w_mid,ndf,m,((J*omega)))[1,1];
+
+if (  (difans2>=.9)==TRUE ){
+cat("\n")
+cat("1-Way MANOVA Balanced A-priori Study Design","\n")
+cat("----------------------------","\n")
+cat("eigs(E-inv*H)=",omega,"\n")
+cat("levels=",n_level,",dependent vars=",l_omega,"\n")
+cat("alpha approx.=.05",",power>=.9","\n")
+cat("repetitions needed=",J,"\n")
+cat("total sample size=",(n_level*J));
+#answer<-c( J, ndf)
+#return(answer)
+break}
+}
+
+
+}
+
