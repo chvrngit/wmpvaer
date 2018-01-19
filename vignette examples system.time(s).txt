@@ -1,0 +1,252 @@
+Example 1, part 1: 
+
+     suppressPackageStartupMessages(library(Rmpfr)); 
+ 	 suppressPackageStartupMessages(library(doParallel));
+     library(wmpvaer);
+	 # prepare data
+     data(plastic);
+     Y<-as.matrix(plastic[,1:3]);
+     rate<-matrix(data=(plastic$rate),nrow(plastic),1);
+     additive<-matrix(data=(plastic$additive),nrow(plastic),1); 
+	 # run wmpvaer function
+    system.time(wmpvaerf(Y~ (rate*additive)));
+
+   user  system elapsed 
+   0.25    0.03   11.32 
+ 
+Example 2, part 1
+
+     suppressPackageStartupMessages(library(Rmpfr)); 
+	 suppressPackageStartupMessages(library(doParallel));
+     library(wmpvaer);
+ 	 # prepare data
+     data(wolf) ;
+     location<-matrix(data=(wolf$location),nrow(wolf),1);
+     sex<-matrix(data=(wolf$sex),nrow(wolf),1);
+     wolf$sex<-NULL;
+     wolf$location<-NULL;
+     wolfm1<-as.matrix(wolf[,1:9]);
+	 # run wmpvaer function
+     system.time(wmpvaerf(wolfm1 ~  (sex * location)));
+
+   user  system elapsed 
+   0.25    0.05   60.16 
+	 
+
+Example 3, part 1
+ 
+     suppressPackageStartupMessages(library(Rmpfr)); 
+ 	 suppressPackageStartupMessages(library(doParallel));
+     library(wmpvaer);
+  	 # prepare data
+	 data(wolf) ;
+     location<-matrix(data=(wolf$location),nrow(wolf),1);
+     sex<-matrix(data=(wolf$sex),nrow(wolf),1);
+     w<-c(wolf$palatal_L, wolf$post_p_L,wolf$zygomatic_W);
+     wolfm1<-matrix(data=w,nrow(wolf),3);
+ 	 # run wmpvaer function
+     system.time(wmpvaerf(wolfm1~sex*location));
+	 
+   user  system elapsed 
+   0.22    0.01   14.08 
+
+
+Example 4, part 1
+
+     suppressPackageStartupMessages(library(Rmpfr)); 
+	 suppressPackageStartupMessages(library(doParallel));
+     library(wmpvaer);
+ 	 # prepare data
+     data(soils) ;
+     soilsfactors<-soils[,1:3];
+     block<-as.factor(soilsfactors[,1]);
+     contour<-soilsfactors[,2];
+     depth<-soilsfactors[,3];
+     soilsm1<-as.matrix(soils[,4:12]);
+ 	 # run wmpvaer function
+     system.time(wmpvaerf(soilsm1~  (block+contour*depth)));
+	 
+     user  system elapsed 
+     0.27    0.02  107.17 
+   
+Example 5, part 1
+   
+    suppressPackageStartupMessages(library(Rmpfr)); 
+    suppressPackageStartupMessages(library(doParallel));
+      library(wmpvaer);
+    # prepare data
+      data(soils) ;
+      soilsfactors<-soils[,1:3];
+      block<-as.factor(soilsfactors[,1]);
+      contour<-soilsfactors[,2];
+      depth<-soilsfactors[,3];
+      soilsm1<-as.matrix(soils[,4:10]);
+    # run wmpvaer function
+      system.time(wmpvaerf(soilsm1~  (block+contour*depth)));
+   
+     user  system elapsed 
+     0.24    0.00   71.20 
+ 
+Example 1, part 1 mlandrf section
+ 
+     suppressPackageStartupMessages(library(Rmpfr)); 
+	 suppressPackageStartupMessages(library(doParallel));
+	 library(methods);
+     library(wmpvaer);
+	 # prepare data
+     data(eigs_plastic);
+     eigsm<-as.matrix(eigs_plastic)
+     colnames(eigsm)<-c(" "," "," ");
+     rownames(eigsm)<-c("rate","additive","rate:additive");
+     e_dfm<-16;
+     m_dfm<-c(1,1,1);
+	 # run S4 object "mlandr" wrapper function
+     system.time(mlandrf(e_dfm,m_dfm,eigsm));
+	 
+   user  system elapsed 
+   0.21    0.00   12.14 
+
+
+Example 2, part 1 mlandrf section 
+
+     suppressPackageStartupMessages(library(Rmpfr)); 
+ 	 suppressPackageStartupMessages(library(doParallel));
+     library(wmpvaer); 
+	 library(methods);
+	 # prepare data
+     data(plastic);
+	 Y<-as.matrix(plastic[,1:3]);
+     rate<-matrix(data=(plastic$rate),nrow(plastic),1);
+     additive<-matrix(data=(plastic$additive),nrow(plastic),1); 
+ 
+     # run lm( )
+     fit <-lm( Y ~  (rate*additive));
+
+     #compute m_df & e_df
+     mstats<-summary(manova(fit), test="Wilks")$stats;
+     fm<-as.matrix(mstats[,1]);
+     nrms<-nrow(fm);
+	 m_df<-fm[1:(nrms-1),];
+     m_dfm<-as.matrix(fm[1:(nrms-1),]);
+     e_df<-fm[nrms,];
+
+     # get list of Sum of Squares matrices
+     ssv<-summary(manova(fit))$SS
+     m1<-length(ssv);
+
+     # first,derive E-Inv   
+     em1<-ssv[[m1]]; #the last SS matrix in the ssv list is the residual matrix
+     e_inv<-solve(em1); # inverts the em1 matrix
+
+     # second, compute eigenvalues for an eigenvalue matrix
+	 eigsm<-eigen((e_inv %*% ssv[[1]] ))$values
+	 if(m1>2){
+     for (i in (2:(m1-1))) {
+     eigenvs<-eigen((e_inv %*% ssv[[i]] ))$values
+     eigsm<-rbind(eigsm,eigenvs);
+     }
+	 }
+     colnames(eigsm)<-c(" "," "," ");
+     rownames(eigsm)<-rownames(m_dfm);
+
+   	 # run S4 object "mlandr" wrapper function
+	 system.time(mlandrf(e_df,m_df,eigsm));
+
+    user  system elapsed 
+    0.24    0.03   11.11 
+  
+Example 1: , part 2
+
+     suppressPackageStartupMessages(library(Rmpfr)); 
+ 	 library(wmpvaer); 
+     # prepare data
+     data(plastic);
+	 plasticm<-as.matrix(plastic[,1:3]);
+     block_v<-c(2)  # identify columns in block 1
+     system.time(statsBIf(plasticm,block_v));
+	 
+     user  system elapsed 
+    17.64    0.00   17.64 
+
+Example 2: , part 2
+
+     suppressPackageStartupMessages(library(Rmpfr)); 
+ 	 library(wmpvaer); 
+     # prepare data
+	 data(wolf) ;
+     wolf$sex<-NULL;
+     wolf$location<-NULL;
+     wolfm1<-as.matrix(wolf[,1:9]);
+     block_v<-c(1,3,5,7)  # identify columns in block 1
+     system.time(statsBIf(wolfm1,block_v));
+	 
+      user  system elapsed 
+    115.22    0.00  115.24 
+
+
+Example 3:, part 2
+
+
+    suppressPackageStartupMessages(library(Rmpfr)); 
+	suppressPackageStartupMessages(library(doParallel));
+	library(wmpvaer);
+    # prepare data
+    data(plastic);
+	plasticm<-as.matrix(plastic[,1:3]);
+	nc_at_time<-1;
+    system.time(statsBIncatf(plasticm,nc_at_time));
+	
+    user  system elapsed 
+    0.12    0.03   20.48 
+
+
+Example 4: part 2
+
+    suppressPackageStartupMessages(library(Rmpfr)); 
+	suppressPackageStartupMessages(library(doParallel));
+	library(wmpvaer);
+    # prepare data
+	data(wolf) ;
+    wolf$sex<-NULL;
+    wolf$location<-NULL;
+    wolfm1<-as.matrix(wolf[,1:9]);
+    nc_at_time<-1;
+    system.time(statsBIncatf(wolfm1,nc_at_time));
+	
+    user  system elapsed 
+    0.11    0.03   59.73 
+
+Example 1: part 3
+
+     suppressPackageStartupMessages(library(Rmpfr)); 
+     library(wmpvaer);
+	 #prepare data
+     data(plastic)
+	 
+	 # select obs w low additive
+     a1<-plastic[plastic$additive=="Low",]; 
+	 # create matrix w dependent vars
+     low_additive<-as.matrix(a1[,1:3]); 
+	 
+	 # select obs w high additive
+     a2<-plastic[!(plastic$additive=="Low"),];
+	 # create matrix w dependent vars
+     high_additive<-as.matrix(a2[,1:3]); 
+	 
+     # run statsECMf with defined matrices
+     system.time(statsECMf(low_additive,high_additive));
+
+     user  system elapsed 
+     107.48    0.03  107.53 
+ 
+Example 1, part 4
+
+     suppressPackageStartupMessages(library(Rmpfr)); 
+     library(wmpvaer);
+	 H2S_eigs<-c(1.317766, 1.004767, 0.4139226, 0.2641087, 0.1737016, 0.08137942, 0.01661141) 
+     H2S_n_level<-11;  
+     system.time(oneway_mss(H2S_n_level,H2S_eigs));
+	
+	 user  system elapsed 
+     35.55    0.03   35.61 
+
