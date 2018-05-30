@@ -1,0 +1,576 @@
+---
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document: default
+  word_document: default
+---
+
+----
+```{r,echo=FALSE} 
+knitr::opts_chunk$set(collapse=TRUE,comment="")
+knitr::opts_knit$set(width=80)
+```
+---
+title: "R Package, Multivariate p-Value Estimation: MANOVA,Block Independence & Bartlett's M ECM Test,Plus 1-Way MANOVA Study Design "
+author: "James V. Chavern"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette, rmarkdown::pdf_vignette
+vignette: >
+  %\VignetteIndexEntry{R Package, Multivariate p-Value Estimation: MANOVA,Block Independence & Bartlett's M ECM Test, Plus 1-Way MANOVA Study Design}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+**Introduction:**
+==================
+
+*Name*
+-----------------------------
+
+The name of this R package is wmpvaer.  This stands for "Wilks MANOVA p-Value Alternative Estimation". The first part of this package contains R programs implementing an alternative to the  approximate F Statistic p calculation (used in the R MANOVA package) for the Wilk's statistic used in MANOVA with a calculation developed in 2005 by Butler and Wood. The package also supplies an S4 object so that the same statistics can be computed with other R programs other than R MANOVA.
+
+The second part of this package computes p-values for a likelihood ratio statistic of block independence, implementing another method from Butler and Wood. 
+
+The third part of this package computes p-values for Bartlett's M test for Equality of Covariance matrices (ECM), again from Butler and Wood's 2005 paper.
+
+The fourth part of this package computes sample size estimates for 1-Way MANOVA analysis using Wilks Lambda and saddlepoint approximation. 
+
+**PART 1 : MANOVA,Wilks Lambda and the Wishart Distribution**
+==============================================================
+
+The distribution of the Wilks Lambda is the ratio of two independently distributed Wishart random variables. It is so complicated (intractable) that its expression in real numbers is almost never used. Currently approximate F tests are the only widely distributed tests for estimating p values for an observed Wilks Lambda statistic.
+
+There is another approach to approximating the Wilks Lambda distribution and p values associated with it.  The moment (and cumulant) generating functions of Wilks Lambda distribution have been known since 1963. These express the Wilks Lambda distribution (on a one to one basis) in terms of complex numbers instead of real numbers. Once either the moment or cumulant generating function of a probability distribution are known saddlepoint approximation becomes feasible. 
+
+The idea of saddlepoint approximation originated with Henry Daniels in 1954 ("Saddlepoint approximations in statistics." Annals of Mathematical Statistics, v. 25 ,pp. 631-650,1954). In 1980 Lugannani and Rice ("Saddlepoint Approximation for the Distribution of the Sum of Independent Random Variables" in Advances in Probability, Vol. 12, pp. 475-490 ,1980) extended Daniels method to the estimation of cumulative distribution functions.
+
+In turn in 2005, in a paper written by Butler, R.W. and Wood, A.T.A. ("Approximation of Power in Multivariate Analysis" in Statistics and Computing Vol. 15, pp. 281-287) Butler and Wood explained how the methods developed could be applied to the otherwise intractable Wilks Lambda distribution. The system of equations, which translates the complex number representation of the Wilks Lambda distribution into a real number approximation, are lengthy and involved.  However, as this package wmpvaer demonstrates, they can be computed. And, with the use of the R high precision computation package Rmpfr, result in an accurate representation of the Wilks Lambda Distribution, which is in turn used to compute accurate estimates of the power of a Wilks Lambda statistic. When used retrospectively (after data is collected), "power" has a one to one relationship to p-values.
+
+
+*wmpvaer p-values created differ substantially from the R MANOVA approximations in the datasets examined*
+---------------------------------------------------------------------------------------------------------
+
+One of the statistician W. Edwards Deming's aphorisms was that "There is no true value of anything".  All that exists, Deming would say, are methods for deriving answers and the answers themselves. When the methods used differ so do the answers arrived at, in general.
+
+Butler and Wood's p approximations are derived, mathematically, directly from the Wilks distribution itself. There is no intermediate approximation requiring the F distribution. Further, there are no justifications or arguments required as to whether the F distribution matches the distribution of the ratio of two independently distributed Wishart random variables.  
+
+*This vignette does not discuss Butler/Wood in detail*
+------------------------------------------------------
+
+If you want to understand the methods underlying the Butler/Wood equations, it is best read Butler and Wood's paper. This vignette primarily concerns samples of data and R coding. The part of the Butler/Wood equations I code with this package addresses only a small portion of the applications possible (p-values and 1-way MANOVA design/sample size estimation).
+
+
+**Samples of Data and R Coding : `wmpvaerf`**
+==================================================
+
+With this package, I include three datasets named respectively "plastic", "soils", and "wolf". Their origins are documented in this package but all three are standard datasets used to demonstrate MANOVA analysis.  
+
+The function used to derive the Wilks power estimates and p values, using output from the R MANOVA routine, is called `wmpvaerf`.  The first matrix output is a matrix composed of the Wilks values and degrees of freedom generated by R's basic MANOVA program using the `summary(fit, test="Wilks")$stats` option and the log of this value. `wmpvaerf` also uses the R MANOVA matrix created using `summary(fit)$Eigenvalues`, but this matrix is not included in the wmpvaerf output.  
+
+The 2nd matrix of `wmpvaerf` output are the values of power and the p-values computed with 120 bit precision ("quadruple precision").
+
+The 3rd matrix of `wmpvaerf` output reformates the second for convenience and adds the values of "r-manova~p" derived from the R MANOVA program.
+
+
+**Example 1: Plastic Dataset**
+-----------------------------
+
+Using the "plastic" dataset (also used as an example in R's MANOVA function documentation), the output of `wmpvaerf` is:
+
+```{r} 
+     suppressPackageStartupMessages(library(Rmpfr)); 
+ 	 suppressPackageStartupMessages(library(doParallel));
+     library(wmpvaer);
+	 # prepare data
+     data(plastic);
+     Y<-as.matrix(plastic[,1:3]);
+     rate<-matrix(data=(plastic$rate),nrow(plastic),1);
+     additive<-matrix(data=(plastic$additive),nrow(plastic),1); 
+	 # run wmpvaer function
+     wmpvaerf(Y~ (rate*additive));
+```
+ 
+**Example 2: Wolf Dataset**
+--------------------------
+
+This a dataset of 9 measurements of 25 wolf skulls from different locations in North America and of different sexes. This data was gathered in the 1950s through the 1970s.
+
+Using all 9 measurements, the following R code results in the following output:
+
+```{r} 
+     suppressPackageStartupMessages(library(Rmpfr)); 
+	 suppressPackageStartupMessages(library(doParallel));
+     library(wmpvaer);
+ 	 # prepare data
+     data(wolf) ;
+     location<-matrix(data=(wolf$location),nrow(wolf),1);
+     sex<-matrix(data=(wolf$sex),nrow(wolf),1);
+     wolf$sex<-NULL;
+     wolf$location<-NULL;
+     wolfm1<-as.matrix(wolf[,1:9]);
+	 # run wmpvaer function
+     wmpvaerf(wolfm1 ~  (sex * location));
+```
+
+**Example 3: Wolf Dataset**
+--------------------------
+
+
+Analysis with only the first three dependent variables in the wolf skull measurement dataset ( "palatal (roof of the mouth) length", "post palatal length" and "zygomatic (cheek bone) width") gives the following results:
+
+```{r} 
+     suppressPackageStartupMessages(library(Rmpfr)); 
+ 	 suppressPackageStartupMessages(library(doParallel));
+     library(wmpvaer);
+  	 # prepare data
+	 data(wolf) ;
+     location<-matrix(data=(wolf$location),nrow(wolf),1);
+     sex<-matrix(data=(wolf$sex),nrow(wolf),1);
+     w<-c(wolf$palatal_L, wolf$post_p_L,wolf$zygomatic_W);
+     wolfm1<-matrix(data=w,nrow(wolf),3);
+ 	 # run wmpvaer function
+     wmpvaerf(wolfm1~sex*location);
+```
+ 
+**Example 4: Soils Dataset**
+---------------------------
+Using the soils dataset and the following code:
+
+```{r} 
+     suppressPackageStartupMessages(library(Rmpfr)); 
+	 suppressPackageStartupMessages(library(doParallel));
+     library(wmpvaer);
+ 	 # prepare data
+     data(soils) ;
+     soilsfactors<-soils[,1:3];
+     block<-as.factor(soilsfactors[,1]);
+     contour<-soilsfactors[,2];
+     depth<-soilsfactors[,3];
+     soilsm1<-as.matrix(soils[,4:12]);
+ 	 # run wmpvaer function
+     wmpvaerf(soilsm1~  (block+contour*depth));
+```
+
+If you use all 48 observations and all 9 dependent variables, the power analysis indicates that depth distinguishes the dependent variables.  This less than surprising result is that, based on this dataset, depth separates the soil types, alone. However, if you had only R MANOVA approximate p-values to consider you would come to a different conclusion.
+
+ 
+**Example 5: Soils Dataset, Using Only The First 7 Dependent Variables**
+---------------------------
+The soils dataset but use only the first 7 dependent variables and the following code:
+
+```{r} 
+     suppressPackageStartupMessages(library(Rmpfr)); 
+	 suppressPackageStartupMessages(library(doParallel));
+     library(wmpvaer);
+ 	 # prepare data
+     data(soils) ;
+     soilsfactors<-soils[,1:3];
+     block<-as.factor(soilsfactors[,1]);
+     contour<-soilsfactors[,2];
+     depth<-soilsfactors[,3];
+     soilsm1<-as.matrix(soils[,4:10]);
+ 	 # run wmpvaer function
+     wmpvaerf(soilsm1~  (block+contour*depth));
+```
+
+If you use all 48 observations and only the first 7 dependent variables,contour appears as significant in contrast to example 4.  The two variables dropped were "Exchangeable+soluble Na" (Na is Sodium, Ex-changeability or CEC is a measure of soil fertility) and "Conductivity" (waters ability to conduct electricity- pure distilled water is a bad conductor).  
+
+
+**Samples of Data and R Coding : `mlandrf`**
+==================================================
+
+To use the estimation routines with programs other than R MANOVA, an S4 object `mlandr` was written.  This object can be used with any routine that analyzes models with multiple dependent variables and that can produce E (an error sum of squares matrix) and H (a sum of squares matrix due to an hypothesis). If E and H exist, the matrix E-inverse*H can then be created and the eigenvalues of this matrix found. 
+
+Example 1 below uses E-inverse*H eigenvalues from the plastic dataset (these are stored in workspace eigs_plastic with eigenvalues generated by R MANOVA). Example 2 creates the MANOVA analysis using the R function lm( ) instead. The `mlandr` S4 object is executed using the R function `mlandrf`.
+
+
+**Example 1: Eigs_plastic Dataset**
+------------------------------------
+
+Using "eigs_plastic" dataset (eigenvalues derived from E-Inv*H),output of mlandrf is:
+
+```{r} 
+     suppressPackageStartupMessages(library(Rmpfr)); 
+	 suppressPackageStartupMessages(library(doParallel));
+	 library(methods);
+     library(wmpvaer);
+	 # prepare data
+     data(eigs_plastic);
+     eigsm<-as.matrix(eigs_plastic)
+     colnames(eigsm)<-c(" "," "," ");
+     rownames(eigsm)<-c("rate","additive","rate:additive");
+     e_dfm<-16;
+     m_dfm<-c(1,1,1);
+	 # run S4 object "mlandr" wrapper function
+     mlandrf(e_dfm,m_dfm,eigsm);
+```
+The computed Wilks statistics are slightly different from the values produced by R MANOVA. They are computed with 120 bit
+precision from the derived eigenvalues.
+
+**Example 2: Plastic Dataset, MANOVA analysis using `lm( )` function and `mlandrf`** 
+--------------------------------------------------------------------------------
+
+Use lm( ) function, create MANOVA w "plastic" dataset & derive eigenvalues from "E-Inv*H"s :
+
+```{r}
+     suppressPackageStartupMessages(library(Rmpfr)); 
+ 	 suppressPackageStartupMessages(library(doParallel));
+     library(wmpvaer); 
+	 library(methods);
+	 # prepare data
+     data(plastic);
+	 Y<-as.matrix(plastic[,1:3]);
+     rate<-matrix(data=(plastic$rate),nrow(plastic),1);
+     additive<-matrix(data=(plastic$additive),nrow(plastic),1); 
+ 
+     # run lm( )
+     fit <-lm( Y ~  (rate*additive));
+
+     #compute m_df & e_df
+     mstats<-summary(manova(fit), test="Wilks")$stats;
+     fm<-as.matrix(mstats[,1]);
+     nrms<-nrow(fm);
+	 m_df<-fm[1:(nrms-1),];
+     m_dfm<-as.matrix(fm[1:(nrms-1),]);
+     e_df<-fm[nrms,];
+
+     # get list of Sum of Squares matrices
+     ssv<-summary(manova(fit))$SS
+     m1<-length(ssv);
+
+     # first,derive E-Inv   
+     em1<-ssv[[m1]]; #the last SS matrix in the ssv list is the residual matrix
+     e_inv<-solve(em1); # inverts the em1 matrix
+
+     # second, compute eigenvalues for an eigenvalue matrix
+	 eigsm<-t(as.matrix(eigen((e_inv %*% ssv[[1]] ))$values))
+	 if(m1>2){
+     for (i in (2:(m1-1))) {
+     eigenvs<-t(as.matrix(eigen((e_inv %*% ssv[[i]] ))$values))
+     eigsm<-rbind(eigsm,eigenvs);
+     }
+	 }
+     colnames(eigsm)<-c(" "," "," ");
+     rownames(eigsm)<-rownames(m_dfm);
+
+   	 # run S4 object "mlandr" wrapper function
+	 mlandrf(e_df,m_df,eigsm);
+```
+The computed Wilks statistics are slightly different from the values produced by R MANOVA. They are computed with 120 bit
+precision from the derived eigenvalues.
+ 
+ 
+**PART 2 : p-Values for LR Test of Block Independence**
+=======================================================
+
+ 
+*What this problem is.*
+-----------------------
+
+
+Let $x_{i}$ be a numerical vector with values assumed to be normally distributed random variables. Further, assume there are N of these vectors, 
+that is, $x_{1}, \cdot \cdot \cdot ,x_{N}$. These could easily be placed in a matrix with $N$ columns.
+  
+Suppose you divide the matrix into two blocks,with the number of columns in the first block=$p_{1}$ and the number of columns in the second=$p_{2}$.  $p_{1}$ and $p_{2}$ are restricted as follows: $p_{1} + p_{2}=N$ and $p_{1} <= p_{2}$. 
+
+From this information compute a sample variance-covariance matrix for all the data $A=\widehat{\Sigma}$ and a sample variance-covariance matrix $A_{1,1}=\widehat{\Sigma_{1,1}}$ for block 1 and $A_{2,2}=\widehat{\Sigma_{2,2}}$ for block 2. Further, compute a sample cross covariance matrix $\widehat{\Sigma_{1,2}}=\widehat{{\Sigma_{2,1}}^{T}}$.
+
+A test of whether block 1 was statistically independent from block 2 (that is, $\Sigma_{1,2}={(\Sigma_{2,1})}^{T}=0_{p1,p2}$ ) could be (Muirhead,R.J,1982 Aspects of Multivariate Statistical Theory, John Wiley,New York,Section 11.2), a likelihood ratio test, specifically:
+
+   $$\Lambda_{BI} = \frac{\vert{A}\vert} {(\vert{ A_{1,1}}\vert \ast \vert{A_{2,2}}\vert)}$$
+
+   
+where $\vert{\bullet}\vert$ is the determinant of a matrix. The distribution of this statistic is a ratio of two independently distributed Wishart random variables, the noncentral version of which is determined by $n=N-1$,$p_{1}$,$p_{2}$, and the estimated eigenvalues of the matrix $(\Sigma_{1,1})^{-1}\ast\Sigma_{1,2}\ast(\Sigma_{2,2})^{-1}\ast\Sigma_{2,1}$.
+	
+	
+But even though the real number form of this distribution is known, it is intractable and not of much use. Butler and Wood showed how saddlepoint methods applied to the known moment generating function of the distribution of $\Lambda_{BI}$ (along with the Lugannani and Rice approximation) converts the $\Lambda_{BI}$ distribution into a usable real numbers form. This R package computes these methods with the functions `statsBIf` and `statsBIncatf`.
+
+Butler and Wood did not provide some essential information for this computation in their paper. Specifically they did not provide the formula for the analytical derivative $\widehat{K\prime(s)}$ (as they did for the Wilks distribution).  But this derivative and the derivative for statsECMf (below) were found and implemented with these programs.
+
+*What the computed distribution provides.*
+------------------------------------------
+
+In the absence of a usable form of the $\Lambda_{BI}$ probability distribution what this statistic $\Lambda_{BI}$ has been used for is to, roughly, reject the null hypothesis ($\Sigma_{1,2}=(\Sigma_{2,1})^{T}=0_{p1,p2}$). If $\Lambda_{BI}$ is "small" then reject the null hypothesis. What is small or large is not defined (other than $\Lambda_{BI}$ is between 0 and 1).
+
+Once you can approximate the $\Lambda_{BI}$ probability distribution, then you can derive a p-value. A small p-value estimate means that there is a small probability of rejecting the null hypothesis in error. A well defined reason to reject a null hypothesis is found.
+
+It turns out that, in the datasets examined, the p-value often doesn't correspond to the size of the $\Lambda_{BI}$ value. Small values of $\Lambda_{BI}$ can have large p-values and large values of $\Lambda_{BI}$ can have small p-values.  Conclusions based on the raw value of $\Lambda_{BI}$ alone don't have much of a rational basis.
+  
+
+**Samples of Data and R Coding : `statsBIf` and `statsBIncatf`**
+===============================================================
+
+**Example 1: Plastic Dataset, statsBIf**
+-----------------------------------------
+
+This is a simple example of `statsBIf` using the plastic dataset. All that is needed for `statsBIf` to run is a matrix composed of numeric values and the definition of a variable identifying what columns are in the first block.
+
+```{r}
+     suppressPackageStartupMessages(library(Rmpfr)); 
+ 	 library(wmpvaer); 
+     # prepare data
+     data(plastic);
+	 plasticm<-as.matrix(plastic[,1:3]);
+     block_v<-c(2)  # identify columns in block 1
+     statsBIf(plasticm,block_v);
+```
+
+**Example 2: Wolf Dataset, statsBIf**
+--------------------------------------
+
+This is a more involved example using the wolf dataset. Again,all that is needed for `statsBIf` to run is a matrix composed of numeric values and the definition of a variable identifying what columns are in the first block. Since there are only 9 columns and p1 must be<=p2, 4 columns is the maximum size for block 1.
+
+
+```{r}
+     suppressPackageStartupMessages(library(Rmpfr)); 
+ 	 library(wmpvaer); 
+     # prepare data
+	 data(wolf) ;
+     wolf$sex<-NULL;
+     wolf$location<-NULL;
+     wolfm1<-as.matrix(wolf[,1:9]);
+     block_v<-c(1,3,5,7)  # identify columns in block 1
+     statsBIf(wolfm1,block_v);
+```
+
+
+**Example 3: Plastic Dataset, statsBIncatf**
+----------------------------------------
+
+`statsBIncatf` uses the methods in `statsBIf` to produce analysis of all columns taken n at a time. Possible values of n are from 1 to floor(N/2), where N is the total number of columns in the data matrix. For the plastic dataset, with 3 columns, the only possible value of n is 1. 
+
+```{r}
+    suppressPackageStartupMessages(library(Rmpfr)); 
+	suppressPackageStartupMessages(library(doParallel));
+	library(wmpvaer);
+    # prepare data
+    data(plastic);
+	plasticm<-as.matrix(plastic[,1:3]);
+	nc_at_time<-1;
+    statsBIncatf(plasticm,nc_at_time)
+```
+This analysis is interesting,though. It presents evidence that the three dependent variables in the data, "tear","gloss" and  "opacity" all display independence from one another.
+
+
+**Example 4: Wolf Dataset, statsBIncatf**
+----------------------------------------
+
+`statsBIncatf` uses the methods in `statsBIf` to produce analysis of all columns taken n at a time. Possible values of n are from 1 to floor(N/2), where N is the total number of columns in the data matrix. For the wolf dataset, with 9 columns, n could be from 1 to 4. However, 9 taken 4 would results in output with 126 elements, 9 taken 3, 84 elements, 9 taken 2, 36 elements.  So in the interest of vignette conservation, this example shows only 9 columns taken 1 at a time in comparison with all other columns.  
+
+```{r}
+    suppressPackageStartupMessages(library(Rmpfr)); 
+	suppressPackageStartupMessages(library(doParallel));
+	library(wmpvaer);
+    # prepare data
+	data(wolf) ;
+    wolf$sex<-NULL;
+    wolf$location<-NULL;
+    wolfm1<-as.matrix(wolf[,1:9]);
+    nc_at_time<-1;
+    statsBIncatf(wolfm1,nc_at_time)
+```
+ 
+**PART 3 : p-Values for Bartlett's Modified LR ECM Test**
+=======================================================================
+
+*What this problem is.*
+-----------------------
+A description of the univariate version of Bartlett's Modified Likelihood Ratio Test can be found on the following web sites:
+http://www.itl.nist.gov/div898/handbook/eda/section3/eda357.htm "1.3.5.7.Bartlett's Test" and http://www.itl.nist.gov/div898/handbook/eda/section3/eda3581.htm
+
+What is computed in this package is a multivariate version, a version with mutiple dependent variables. In terms of a data matrix it can be thought of as the transpose of block independence computed with `statsBIf` above. In it, a data matrix is segregated by rows instead of columns, into two groups. A test of  equality of covariances between the two groups is then performed.   
+
+The univariate version of this Bartlett's test depends on a Chi-Squared distribution. The multivariate version, in turn, depends of the multivariate version of the Chi-Squared distribution, the Wishart distribution, in particular a ratio of two Wishart distributed random variables.
+
+The distribution of this multivariate Bartlett test is known, assuming random variable normality, as is its moment generating function. Bulter and Wood show how the Lugannani and Rice approximation of this known distribution can be used to derive power and p-value estimates otherwise unobtainable. 
+
+Let $x_{1}, \cdot \cdot \cdot ,x_{N1}$ be a matrix with N1 rows and p columns with data sampled from a multivariate normal distribution, 
+$N_{p}({\mu_{1}},{\Sigma_{1}})$.  And assume there is another matrix $x_{1}, \cdot \cdot \cdot ,x_{N2}$ a matrix with N2 rows and (the same) p columns sampled from a multivariate normal distribution with ${\mu_{2}}$ and ${\Sigma_{2}}$. $N1$ does not have to be equal to $N2$. ${\mu_{1}}$ does not have to equal ${\mu_{2}}$.
+
+The null hypothesis of equal covariance matrices (ECM) is:
+                $$\Sigma_{1} = \Sigma_{2} = \Sigma $$  
+
+A likelihood ratio test in this case is can be
+
+$$\Lambda_{ECM} =\frac{(\vert{A_{1}}\vert)^\frac{n1}{n} \ast (\vert{A_{2}}\vert)^\frac{n2}{n} }{(\vert({A_{1}} + {A_{2}})\vert)}$$
+
+where $\vert{\bullet}\vert$ is the determinant of a matrix.  $A_{1}$ and $A_{2}$ are the estimated variance covariance matrices for the two data matrices. The distribution of this statistic is a ratio of two independently distributed Wishart random variables, the noncentral version of which is determined by $n1=N1-1$,$n2=N2-1$,$n=n1+n2$,$p$,and the estimated eigenvalues of the matrix $\Sigma_{1} \ast {\Sigma_{2}^{-1}}$.
+ 
+
+**Example 1: Plastic Dataset, Additive Variable, statsECMf**
+-------------------------------------------------------------
+
+```{r}
+     suppressPackageStartupMessages(library(Rmpfr)); 
+     library(wmpvaer);
+	 #prepare data
+     data(plastic)
+	 
+	 # select obs w low additive
+     a1<-plastic[plastic$additive=="Low",]; 
+	 # create matrix w dependent vars
+     low_additive<-as.matrix(a1[,1:3]); 
+	 
+	 # select obs w high additive
+     a2<-plastic[!(plastic$additive=="Low"),];
+	 # create matrix w dependent vars
+     high_additive<-as.matrix(a2[,1:3]); 
+	 
+     # run statsECMf with defined matrices
+     statsECMf(low_additive,high_additive);
+```
+	 
+In all wmpvaer datasets the value of $\Lambda_{ECM}$ estimated is small as is the estimated p-value. The test rejects the null hypothesis of equality of covariance matrices for all datasets that were examined. 
+
+If $\Sigma_{1}$ is equal to ${\Sigma_{2}}$ and both are invertible matrices then $\Sigma_{1} \ast {\Sigma_{2}^{-1}}=I$ ,an identity matrix, with all of its eigenvalues equal to 1. In the plastic additive variable example above the estimated $\Sigma_{1} \ast {\Sigma_{2}^{-1}}$ is:
+	
+```{r echo=FALSE, results='asis'}
+    library(knitr)
+	library(wmpvaer)
+	kable(additive_eigmECM);
+```
+	
+```{r echo=FALSE, results='asis'}
+    library(knitr)
+	library(wmpvaer)
+	kable(additive_sigma_eigv, caption="with Eigenvalues");
+```
+
+This matrix is far from an identity matrix and the eigenvalues are not a vector of 1s. Unless this matrix is some reasonable approximation of an identity matrix, Bartlett's modified LR ECM test is likely to reject the null hypothesis of equal covariance matrices. 
+
+*Computational issue.*
+-----------------------
+
+For both the block independence and equivalence of covariance matrices program (`statsBIf` and `statsECMf` respectively) bisection search alone would not converge with an accurate answer. In both sets of programs, bisection search is augmented by a preliminary scan of possible solutions. For `statsBIf` this is done at fixed intervals. For `statsECMf` the solutions are selected using a random sample.
+
+For `statsECMf`, if the program is executed repeatedly on the same dataset, slightly different p-values can result.  
+
+ 
+**PART 4: Butler/Wood Saddlepoint Solution, Sample Size Estimation, Balanced 1-Way MANOVA Design**
+====================================================================================================
+
+*Method Outline*
+----------------------------------------------------------------------------------
+
+In a preliminary version of their 2005 paper, Butler and Wood outlined the following method for estimating the number of replications needed for a 1-way MANOVA design.
+
+Define $G_{0}(x):= Pr(log(Wilks)<=x\vert \Omega=0{p,p})$. 
+
+Recall that the p-value or pr(type 2 error) is defined to be $Pr(x<=log(Wilks)\vert\Omega_{observed})$. Conversely the power value is $Pr(x>log(Wilks)\vert\Omega_{observed})$ or 1-pr(type 2 error). So $Pr(log(Wilks)<=x\vert \Omega=0{p,p})$ (assuming  $\Omega=0{p,p}$) is the probability of a type 1 error (or probability of a false positive, incorrectly rejecting a null hypothesis when it should not be rejected). The Butler/Wood equations used to estimate this function are the same as those used to estimate a p-value when $\Omega$ is an observed value instead of an assumed null value $\Omega=0{p,p}$. In a study design $G_{0}(x):= Pr(log(Wilks)<=x\vert \Omega=0{p,p})$ is often referred to as alpha ($\alpha$).  
+
+Call the approximation of $G_{0}(x)$ $\widehat{G_{0}}(x)$. Then 
+
+1. From this find $x_{0}:=\widehat{G_{0}^{-1}}(.05)$ , where $x_{0}$ is the Wilks value that gives a type 1 error probability of .05.
+
+2. Make the assumption that you know what $\Omega_{1}$ (the vector of eigenvalues) is for your study. This is guessed at from the result of past studies or it can simply be set hypothetically.
+
+3. The power function for this $\Omega_{1}$ is $G_{\Omega_{1}}(x,J):= Pr(x>log(Wilks)\vert\Omega=J\ast\Omega_{1})$ (where J is the number of replications to be used in the study). And its estimate is $\widehat{G_{\Omega_{1}}}(x,J)$. 
+
+4. Plot $\widehat{G_{\Omega_{1}}}(x_{0},J)$ vs J=2,3,4..... From the plot estimate what J value results in $\widehat{G_{\Omega_{1}}}(x_{0},J)=.9$. Or computationally find J such that $\widehat{G_{\Omega_{1}}}(x_{0},J)=.9$.  The value of J resulting will give you an estimate of the number of replications needed so that your Wilks statistic will have an alpha level of .05 and an a-priori power value of .9. This is your guess anyway before the study is conducted and the data is collected.   
+
+This method is not generally practical with the R code in this package (as Butler and Wood described the method). The power function and alpha estimate also require that the error and model degrees of freedom be specified. As the number of error,model degrees of freedom and dimension of $\Omega$ increases the question of just where exactly $x_{0}:=\widehat{G_{0}^{-1}}(.05)$ becomes unanswerable as is the question of where $\widehat{G_{\Omega_{1}}}(x_{0},J)=.9$. This is a limitation of this R code.
+
+If the question is "$x_{0}:\approx\widehat{G_{0}^{-1}}(.05)$ , where $x_{0}$ is the Wilks value that gives a type 1 error probability close to the $x_{0}$ that equals .05."  and where "$\widehat{G_{\Omega_{1}}}(x_{0},J)>=.9$" instead of "$=.9$" then the problem  is computable (within limits) with the code created. 
+
+These computational limits are: 1. No less than 2 and no more than 7 dependent variables; and 2. The program currently can handle no more than 12 levels in the independent variable used in the 1-way MANOVA analysis.
+
+
+**Samples of Data and R Coding : `oneway_mss`** 
+==============================================
+
+The dataset (stored as "chem_exp") ,used here to demonstrate the R function 'oneway_mss', is of unknown origin. It appears to be from a chemistry experiment. 
+
+There are 45 observations and  8 columns. The columns are titled (in order) "H2S, P,K,Ca,Mg,Na,Mn,Zn". It is assumed "H2S" is the independent variable, and is the level of hydrogen sulfide applied to some unknown substance. The 7 other columns appear to be dependent variables corresponding to measurements of Phosphorus,Potassium,Calcium,Magnesium,Sodium,Manganese and Zinc. "H2S" has 11 distinct values (all the other variables have 45 for each variable). These levels and the number of observations taken at each level are:
+
+              
+H2S levels    |-640|-630|-620|-610|-600|-590|-580|-570|-560|-550|-540 
+--------------|----|----|----|----|----|----|----|----|----|----|-----
+obs per level |  5 |   6|   6|   8|   3|   2|   2|   5|   3|   2|   2 
+
+
+If you perform a 1-Way MANOVA analysis using the R lm( ) function, using H2S as a factor, and derive the (E-inverse*H) eigenvalues, you get the following vector: `H2S_eigs<-c(1.317766, 1.004767, 0.4139226, 0.2641087, 0.1737016, 0.08137942, 0.01661141)`. This can be used with `oneway_mss` as follows:
+                                                                 
+
+**Example 1: chem_exp dataset, factor H2S, R function `oneway_mss`**
+---------------------------------------------------------------------
+
+```{r}
+    suppressPackageStartupMessages(library(Rmpfr)); 
+    library(wmpvaer);
+	H2S_eigs<-c(1.317766, 1.004767, 0.4139226, 0.2641087, 0.1737016, 0.08137942, 0.01661141) 
+    H2S_n_level<-11;  
+    oneway_mss(H2S_n_level,H2S_eigs);
+```
+
+So if this study was repeated or the eigenvalues derived were used in the design of a new study , the requirement (in both cases) that alpha=.05 approximately and power was >=.9 could be met with 22 observations or two replications for each level.
+
+In some cases, the estimate of the power does not exceed .9 even after 20 replications. In that case the program is stopped when replications appear to exceed 20.
+
+
+**NOTE: BISECTION SEARCH FAILURE**
+-----------------------------------
+
+The programs employ bisection search at some stages. Bisection search is an elementary search method. Bisection search can fail. When the bisection search for an estimation of power fails (does not converge with enough accuracy), an error statement (with the text "No Answer") appears. 
+
+**NOTE: PARALLEL COMPUTATION**
+-----------------------------------
+
+This version of wmpvaerf,mlandrf was rewritten to take advantage of the R package "doParallel". The program statsBIncatf employed that R package from the beginning. These versions employ only one core if only one or two cores are available. Otherwise, the number of computer cores used is the minimum of "the number of independent variables in the model in question" or "the maximum number of available cores minus one" in the case of wmpvaerf and mlandrf. In the case of statsBIncatf, only the last condition applies.
+
+
+**APPENDIX**
+------------
+
+*Wilks Distribution Non-Centrality Parameter*
+---------------------------------------------
+
+It is useful to know what the estimated non-centrality parameter of the Wilks distribution is.
+
+The following is a direct quote from Butler and Wood's 2005 paper:
+
+"
+2.1.1. The likelihood in MANOVA
+
+Consider the general linear model $Y = XB + E$ where the rows of $E$ are i.i.d. $N_{p}(0,E)$, $X(N \times q)$ is a known full rank matrix of  covariates, $B(q \times p)$ is a matrix of unknown parameters,$E(N \times p)$ is the "error" matrix and $Y(N \times p)$ is the observation matrix. 
+
+We assume that $\Sigma$ is an unknown covariance matrix of full rank. The general linear hypothesis $H_{GLM}$ can be expressed as $H_{GLM}: CB=0_{m,p}$ where $C(m \times q)$ is a suitable rank $m$ matrix of known constants, and $0_{m,p}$ is the $m \times p$ matrix of zeros.
+ 
+The likelihood ratio statistic $\Lambda_{GLM}$ for testing the null hypothesis $H_{GLM}$, may be written$$\Lambda_{GLM} = \frac{\vert{SS_{err}}\vert} {(\vert{SS_{hypo} + SS_{err}}\vert)}$$,where $\vert{\bullet}\vert$ denotes determinant. Under the model described above, the following results hold: $SS_{hypo}$ and $SS_{err}$ are independent; $SS_{err}$ has a $p$-dimensional central Wishart distribution with $n=(N \text{-} q)$ degrees of freedom and shape matrix $\Sigma$, denoted as $Wishart_{p}(n,\Sigma)$; and $SS_{hypo}$ has a $p$-dimensional non-central Wishart distribution with $m$ degrees of freedom, shape matrix $\Sigma$, and non-centrality matrix $\Omega=(\Sigma)^{-1}(M_{1})^{T} M_{1}$, where $m \times p$ matrix $M_{1}$ is described in Section 10.2 of Muirhead (1982). The hypothesis $H_{GLM}$ holds if and only if $M_{1}=0_{m,p}$.
+"
+
+*$M_{1}$ in terms of estimated components*
+--------------------------------------------
+
+It is easier if you think of a MANOVA model in a slightly different way. That is let the initial multivariate model be: 
+$$Y_{n \times p} = (X_{n \times k} \ast B_{k \times p}) + E_{n \times p}$$ where the usual iid  and normality assumptions hold for E and X is of full rank.  $(X_{n \times k} \ast B_{k \times p})$ could be a matrix of mean terms.   
+ 
+And suppose further you consider fitting a second model instead:
+$$Y_{n \times p} = (X_{n \times k} \ast B_{k \times p}) + (Z_{n \times m} \ast \Delta_{m \times p}) +  E_{n \times p}$$  
+and as a result want to test the null hypothesis that $H_{0}: \Delta =0$. 
+
+First, transform $Y = XB + E$ as follows:
+$$U_{1}=(V_{1})^{T}\ast Y$$ where 
+$$V_{1}^{T}=(Z^{T}\ast M \ast Z)^{-\frac{1}{2}} \ast (Z^{T} \ast M)$$ ,  $M$ is square,symmetrix and idempotent and $Z$ is a conformable matrix. Then create another transform:
+$$U_{2}=(V_{2})^{T}\ast Y$$ where 
+$$V_{2}^{T}=(X^{T}\ast X)^{-\frac{1}{2}} \ast (X^{T})$$ so that
+$$V_{2}^{T} \ast Y=(X^{T}\ast X)^{\frac{1}{2}} \ast \widehat{B}$$
+
+Note (dispensing with the $\ast$) that :
+$$V_{1}^{T}V_{1}=(Z^{T}MZ)^{-\frac{1}{2}}(Z^{T}MZ)^{-\frac{1}{2}}(Z^{T}MMZ)=I_{m \times m}$$ and  
+$$V_{2}^{T}V_{2}=(X^{T}X)^{-\frac{1}{2}}(X^{T}X)^{-\frac{1}{2}}(X^{T}X)=I_{k \times k}$$   
+ 
+If there existed a third matrix $V_{3}$ with columns that are mutually orthogonal and that is (further) orthogonal to the columns of $(V_{1},V_{2})$ then the matrix $V=(V_{1},V_{2},V_{3})$ is an orthogonal matrix. 
+
+In this context the Wilks $\Lambda$ the non-centrality parameter,$\Omega=(\Sigma)^{-1}(M_{1})^{T}M_{1}$,is an orthogonal matrix with $M_{1}=E[U_{1}]=(Z^{T}MZ)^{-\frac{1}{2}}(Z^{T}MZ)\Delta$.  
+
+This implies $(M_{1})^{T}(M_{1})=(\Delta^{T})(Z^{T}MZ)(\Delta)$ which further implies ,for the estimates,
+$(\widehat M_{1})^{T}(\widehat M_{1})=(\widehat\Delta^{T})(Z^{T}MZ)(\widehat\Delta)$. Since the estimate $\widehat\Delta$ is $\widehat\Delta= (Z^{T}MZ)^{-\frac{1}{2}}(Z^{T}M)(Y)$ then $$(\widehat M_{1})^{T}(\widehat M_{1})= (Y^{T})(Z^{T}MZ)^{-1}(MZZ^{T}M)(Y)=  
+SS_{null}\text{-}SS_{alternative\text{-}model}=SS_{hypothesis}$$
+
+So the estimate of the Wilks non-centrality parameter is: $\widehat\Omega=n(SS_{error})^{-1}(SS_{hypothesis})$ where $n$ is the number of degrees of 
+freedom described above,  $n=(N \text{-} q)$, $q$ is the number of estimated model parameters, $N$ the number of total observations. 
+
+Note that while $\widehat\Omega=n(SS_{error})^{-1}(SS_{hypothesis})$ is the definition of the Wilks non-centrality parameter, $\Omega$ in most of Butler and Wood's paper (and in the code R packages I have written) is used slightly differently. It is defined to be $\Omega=$ eigenvalues of the matrix $(SS_{error})^{-1}\ast(SS_{hypothesis})$. $n=(N \text{-} q)$ is treated as a separate set of parameters. $\Omega=(0,0,0)$ is for example a vector of eigenvalues of the matrix  $((SS_{error})^{-1} \ast (SS_{hypothesis}))=0_{p \times p}$ found under the null hypothesis when p (the number 
+of dependent variables) =3.  In the plastics example, for the rate variable with the observed data, $\Omega=(1.6187719,-9.273797e-17,3.365044e-18)$.
