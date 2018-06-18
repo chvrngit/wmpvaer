@@ -407,7 +407,7 @@ p_l_and_rBI<- function(lambdaBI,N,psqrd) {
 s_hat<-p_find_sBI(lambdaBI,N,psqrd);
 
 if(is.na(s_hat)){
-power_answers<-matrix(data=(c(NA,NA)),1,2);
+pv_answer<-NA;
 } else {
 
 lambdaBIn<-Rmpfr::mpfr(lambdaBI,precBits=120 ) 
@@ -437,8 +437,9 @@ type2error<-1;
 }
 ans<-c(type2error);
 pv_answer<-as.matrix(ans);
-return(pv_answer)
 }
+return(pv_answer)
+
 }
 
 #' statsBIf   Computes lambdaBI statistics,p-values, and shows the block matrix definitions
