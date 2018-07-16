@@ -23,7 +23,6 @@ x<-t(as.matrix(x));
 
 cap_1<-p1*(( ((.a1^(.a4 - 1))*.a3) + (.a5 * log( abs(.a1))) )/.a5)
 
-#cap_1<-p1*(( ((.a1^(.a4 - 1))*.a3) + (.a5 * log(.a1)) )/.a5)
 
 #computation of the derivative of log(R21)
 
@@ -94,7 +93,6 @@ thrd1<-thrd1a/thrd1b;
 .d6 <- (-.d1)^2 + a * (1 - 4 * (s * .d2)) + s; 
 .d7 <- sqrt(abs(.d6)); 
 .d8 <- 1 - 2 * (a/.d7); 
-#.d8<-1;
 #.d10 <- log(.d8) - log(s); 
 .d10<-1;
 
