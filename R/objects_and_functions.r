@@ -788,7 +788,8 @@ doParallel::registerDoParallel(cl);
 resultsa<-{
 foreach::foreach(i=1:leigs,.combine=Rmpfr::rbind,
 .export=c("p_find_s","p_kprs", "p_kprs2","p_mgamma","p_lmglm",
-"p_l_and_r","p_oneFhatone" ) )  %dopar% {(p_l_and_r(w[i,1],n,m[i,1],eigs[i,]));}
+"find_min_s_hat","p_l_and_r","p_oneFhatone" ) )  %dopar% 
+{(p_l_and_r(w[i,1],n,m[i,1],eigs[i,]));}
 }
 
 parallel::stopCluster(cl);
