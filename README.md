@@ -5,7 +5,7 @@ likelihood ratio statistic for block independence and equivalence of covariance 
 
 Description ver(1.1) adds the following sentence:  In a fourth part, computes a sample size estimate for 1-way MANOVA using the Wilks Lambda statistic and Butler/Wood algorithm. 
 
-This github repository also contains a PDF of Butler/Wood 2005. In addition a tar.gz which can be downloaded to separately install the R package from a local file without using the devtools program with the R GUI (that is, >devtools::install_github("chvrngit/wmpvaer)).
+This github repository also contains a PDF of Butler/Wood 2005. In addition a tar.gz which can be downloaded to separately install the R package from a local file without using the devtools program with the R GUI (that is, >devtools::install_github("chvrngit/wmpvaer")).
 
 To tell you the truth just downloading the tar.gz file is alot faster than using devtools and install_github. But remember if you go the devtools and install_github route ,and want the vignette, you have to use >devtools::install_github("chvrngit/wmpvaer",build_vignettes=TRUE) instead and use >vignette("wmpvaerV", "wmpvaer") to view the vignette created.
 
