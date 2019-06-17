@@ -36,7 +36,7 @@ cap_m4<-Rmpfr::mpfr((matrix(0,p,p)),120  );
 
 for(i in (1:p)){
 for(j in (i:p)){
-cap_m1[1,j]<-(  (  (yhat[1,i]*yhat[1,j])/a )  +   (    (1-yhat[1,i])*(1-yhat[1,j]) / (b-a) ) )^(-1);
+cap_m1[i,j]<-(  (  (yhat[1,i]*yhat[1,j])/a )  +   (    (1-yhat[1,i])*(1-yhat[1,j]) / (b-a) ) )^(-1);
 }
 }
 
