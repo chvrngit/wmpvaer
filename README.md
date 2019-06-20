@@ -12,7 +12,7 @@ now in the R package, an ensemble method.  But it exists only in Python code at 
 
 This github repository also contains a PDF of Butler/Wood 2005. In addition a tar.gz which can be downloaded to separately install the R package from a local file without using the devtools program with the R GUI (that is, >devtools::install_github("chvrngit/wmpvaer")).
 
-You can downloading the tar.gz file listed and then install the package using devtools and install_github. But remember if you go the devtools and install_github route ,and want the vignette, you have to use devtools::install_github("chvrngit/wmpvaer",build_vignettes=TRUE) instead and use >vignette("wmpvaerV", "wmpvaer") to view the vignette created.
+You can download the tar.gz file from the repository and then install the package using devtools and install_github. But remember if you go the devtools and install_github route ,and want the vignette, you have to use devtools::install_github("chvrngit/wmpvaer",build_vignettes=TRUE) instead and use >vignette("wmpvaerV", "wmpvaer") to view the vignette created.
 
 JUST WANT THE VIGNETTE? YOU ARE IN LUCK- YOU DON'T HAVE TO CREATE A COPY OF IT YOURSELF.
 I have also included a file "wmpvaerVpdf.pdf" in this github repository. It contains the PDF vignette.
