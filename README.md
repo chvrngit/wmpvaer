@@ -7,6 +7,8 @@ Description ver(1.1) adds the following sentence:  In a fourth part, computes a 
 
 Ver(1.2) differs from version 1.1 in that I found a one instruction error in the Wilks Lambda code in version 1.1. This was in the routine p_kprs that computes the first derivative as a function of s using an analytical formula. It changes the results in the first five vignette examples, mostly with minor numerical differences.  However, in example 2, Wolf Skull measurements with all the variables, the variable “location” displays significance whereas in Ver. 1.1 it did not. In example 3,the interaction term is now significant whereas in Ver. 1.1 it was not. In example 4, Soils Data, with all variables considered,contour along with depth displays significance unlike in ver. 1.1.  In example 5, with only 7 variables, only the interaction term is not significant, unlike in ver. 1.1. In my defense, I wrote all this code (and documentation) myself. And there are thousands of lines of it. 
 
+The correction in p_kprs also allows the number of dependent variables that can be handled in the 1-way MANOVA study design section to be expanded from 7 to 10. I believe in the future it could be expanded further.
+
 Also for ver(1.2): In reference to the functions statsBIf and statsBIncatf, I have developed a much better algorithm than the one
 now in the R package, an ensemble method.  But it exists only in Python code at the moment. 
 
