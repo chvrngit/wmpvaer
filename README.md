@@ -19,4 +19,4 @@ You can download the tar.gz file from the repository and then install the packag
 JUST WANT THE VIGNETTE? YOU ARE IN LUCK- YOU DON'T HAVE TO CREATE A COPY OF IT YOURSELF.
 I have also included a file "wmpvaerVpdf.pdf" in this github repository. It contains the PDF vignette.
 
-
+On November 10,2019, I was approved by Github to participate in the Github Sponsored Developer program. This means that if someone wanted to pay me money to add to wmpvaer and related open source Github computer programs on an ongoing monthly basis, Github would collect the money and send it to me. And for one year partly match the payment made. Without financial support progress will be limited otherwise. For those interested see https://github.com/sponsors.
